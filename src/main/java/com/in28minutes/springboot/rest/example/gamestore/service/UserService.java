@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.in28minutes.springboot.rest.example.gamestore.aop.LogActivity;
+import com.in28minutes.springboot.rest.example.gamestore.contract.ChangePasswordRequest;
 import com.in28minutes.springboot.rest.example.gamestore.contract.EditUserProfileRequest;
 import com.in28minutes.springboot.rest.example.gamestore.contract.GameResponse;
 import com.in28minutes.springboot.rest.example.gamestore.contract.LoginRequest;
@@ -33,6 +34,7 @@ import com.in28minutes.springboot.rest.example.gamestore.entity.Role;
 import com.in28minutes.springboot.rest.example.gamestore.entity.User;
 import com.in28minutes.springboot.rest.example.gamestore.exception.ClassNotFoundException;
 import com.in28minutes.springboot.rest.example.gamestore.exception.ExceptionEnum;
+import com.in28minutes.springboot.rest.example.gamestore.exception.ForbiddenException;
 import com.in28minutes.springboot.rest.example.gamestore.repository.UserRepository;
 import com.in28minutes.springboot.rest.example.gamestore.security.JwtTokenProvider;
 import com.in28minutes.springboot.rest.example.gamestore.util.FileUtil;
@@ -167,6 +169,15 @@ public class UserService implements UserDetailsService {
 		User savedUser = userRepository.save(user);
 		return savedUser;
     }
+ 	@Transactional
+ 	@LogActivity(activity="Change Password")
+ 	public void changePassword(UserPrincipal currentUser, ChangePasswordRequest input) {
+ 		User user = this.retrieveUser(currentUser.getId());
+ 		userValidation.changePasswordValidation(user, input);
+ 		String hashedPassword = passwordEncoder.encode(input.getNewPassword());
+ 		userRepository.setPassword(user.getId(), hashedPassword);
+ 		
+ 	}
  	@LogActivity(activity="Edit Photo Profile")
     public UploadFileResponse updatePhotoProfile( UserPrincipal currentUser, MultipartFile file){
     	User user = retrieveUser(currentUser.getId());

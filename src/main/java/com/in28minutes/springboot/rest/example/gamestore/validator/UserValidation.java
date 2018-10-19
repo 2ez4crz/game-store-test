@@ -3,8 +3,10 @@ package com.in28minutes.springboot.rest.example.gamestore.validator;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.in28minutes.springboot.rest.example.gamestore.contract.ChangePasswordRequest;
 import com.in28minutes.springboot.rest.example.gamestore.entity.User;
 import com.in28minutes.springboot.rest.example.gamestore.exception.BadRequestException;
 import com.in28minutes.springboot.rest.example.gamestore.exception.ForbiddenException;
@@ -16,6 +18,8 @@ import com.in28minutes.springboot.rest.example.gamestore.util.DateUtil;
 public class UserValidation {
 	@Autowired 
 	UserRepository userRepository;
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
 	public void isUserIdAlreadyExistValidator(Long userId) {	
 		Optional<User> user = userRepository.findById(userId);
@@ -56,5 +60,12 @@ public class UserValidation {
 		this.isUsernameAlreadyExistValidator(user.getUsername());
 		this.isEmailAlreadyExistValidator(user.getEmail());
 	}
-	
+	public void changePasswordValidation(User user, ChangePasswordRequest input) {
+		if(!passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
+ 			throw new ForbiddenException("Wrong password", ExceptionEnum.PASSWORD_MISMATCH);
+ 		}
+		if(input.getNewPassword().length()<8 || input.getNewPassword().length()>16) {
+			throw new BadRequestException("Password must be 8-16 digit.", ExceptionEnum.INVALID_INPUT);
+		}
+	}
 }

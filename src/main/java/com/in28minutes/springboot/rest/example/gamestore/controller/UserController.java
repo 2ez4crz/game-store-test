@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.in28minutes.springboot.rest.example.gamestore.contract.ChangePasswordRequest;
 import com.in28minutes.springboot.rest.example.gamestore.contract.EditUserProfileRequest;
 import com.in28minutes.springboot.rest.example.gamestore.contract.UploadFileResponse;
 import com.in28minutes.springboot.rest.example.gamestore.contract.UserPrincipal;
@@ -65,6 +66,11 @@ public class UserController {
  		User updatedUser = userService.updateProfile(currentUser, user);
 // 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/myProfile/edit")
 //				.buildAndExpand(updatedUser.getId()).toUri();
+		return ResponseEntity.ok().body("Update Success!");
+ 	}
+ 	@PutMapping("myProfile/password/edit")
+ 	public ResponseEntity<Object> updatePassword(@CurrentUser UserPrincipal currentUser, @RequestBody ChangePasswordRequest  input){
+ 		userService.changePassword(currentUser, input);
 		return ResponseEntity.ok().body("Update Success!");
  	}
 // 	@PostMapping("myProfile/updatePhoto")
